@@ -298,6 +298,10 @@
       <div class="ico" style="background:var(--green-light)"><i class="ti ti-history" style="color:var(--green)"></i></div>
       <div class="sec-title">Сохранение и экспорт</div>
     </div>
+    <div class="field" style="margin-bottom:10px">
+      <label>Название проекта</label>
+      <input type="text" id="projectName" placeholder="Например: Весенний спецпроект 2025" style="max-width:400px">
+    </div>
     <div class="export-bar">
       <button class="btn btn-primary" id="saveBtn" onclick="saveSnapshot()">
         <i class="ti ti-bookmark"></i> Сохранить снапшот
@@ -498,7 +502,8 @@ function collectState() {
   const direct = media + prod + edit + bonus;
   const profit = totalRev - direct;
   const margin = totalRev > 0 ? (profit/totalRev)*100 : 0;
-  return { totalRev, media, prod, edit, bonus, direct, profit, margin, brands,
+  const projectName = document.getElementById('projectName').value.trim() || '—';
+  return { totalRev, media, prod, edit, bonus, direct, profit, margin, brands, projectName,
            mediaInt:v('mediaInt'), mediaDSP:v('mediaDSP'),
            p1:v('p1'), p2:v('p2'), e1:v('e1'), e2:v('e2'), e3:v('e3'),
            bonusSales:v('bonusSales'), bonusAcc:v('bonusAcc'), bonusOther:v('bonusOther') };
@@ -542,11 +547,12 @@ function renderHistory() {
   }
   el.innerHTML = `
     <table class="history-table">
-      <thead><tr><th>Дата / время</th><th>Выручка</th><th>Затраты</th><th>Прибыль</th><th>Маржа</th><th></th></tr></thead>
+      <thead><tr><th>Проект</th><th>Дата</th><th>Выручка</th><th>Затраты</th><th>Прибыль</th><th>Маржа</th><th></th></tr></thead>
       <tbody>
         ${snapshots.map(s=>`
           <tr>
-            <td>${s.label}</td>
+            <td>${escHtml(s.projectName || '—')}</td>
+            <td style="color:var(--text2);font-weight:400">${s.label}</td>
             <td>${fmtS(s.totalRev)}</td>
             <td>${fmtS(s.direct)}</td>
             <td style="font-weight:600;color:${s.profit>=0?'var(--green)':'var(--red)'}">${fmtS(s.profit)}</td>
@@ -564,10 +570,10 @@ function exportCSV() {
     return;
   }
   const rows = [
-    ['Дата','Брендов','Выручка (₽)','Медийка (₽)','Продакшен (₽)','Контент (₽)','Премии (₽)','Итого затраты (₽)','Прибыль (₽)','Маржа (%)']
+    ['Проект','Дата','Брендов','Выручка (₽)','Медийка (₽)','Продакшен (₽)','Контент (₽)','Премии (₽)','Итого затраты (₽)','Прибыль (₽)','Маржа (%)']
   ];
   snapshots.forEach(s => {
-    rows.push([ s.label, s.brands?s.brands.length:'—', s.totalRev, s.media, s.prod, s.edit, s.bonus||0, s.direct, s.profit, s.margin.toFixed(1) ]);
+    rows.push([ s.projectName||'—', s.label, s.brands?s.brands.length:'—', s.totalRev, s.media, s.prod, s.edit, s.bonus||0, s.direct, s.profit, s.margin.toFixed(1) ]);
     if (s.brands && s.brands.length) {
       rows.push(['','Бренд','Ставка входа','Доп. опции','Итого по бренду','','','','','']);
       s.brands.forEach(b => rows.push(['', b.name, b.entry, b.extra, b.total, '', '', '', '', '']));
