@@ -4,133 +4,343 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор маржинальности спецпроекта</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/webfont/tabler-icons.min.css">
+<title>maam · Калькулятор маржинальности</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5f4f0; --surface: #ffffff; --surface2: #f0efe9;
-    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
-    --text: #1a1a18; --text2: #6b6a65; --text3: #9b9a95;
-    --radius: 12px; --radius-sm: 8px;
-    --green: #0F6E56; --green-light: #E1F5EE;
-    --amber: #854F0B; --amber-light: #FAEEDA;
-    --purple: #534AB7; --purple-light: #EEEDFE;
-    --teal: #0F6E56; --teal-light: #E1F5EE;
-    --coral: #993C1D; --coral-light: #FAECE7;
-    --blue: #185FA5; --blue-light: #E6F1FB;
-    --red: #A32D2D;
-  }
+    /* maam brand colors */
+    --pink:        #FF8898;
+    --pink-light:  #FFE2E6;
+    --pink-mid:    #FFC2B7;
+    --lavender:    #DDE2FF;
+    --lavender-deep: #93A2FF;
+    --yellow-light: #FFE4B8;
+    --yellow:      #FFC158;
+    --blue-light:  #BCD7E5;
+    --teal-light:  #C8EBEC;
+    --teal:        #7BC8CA;
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1a1a18; --surface: #242422; --surface2: #2e2e2b;
-      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
-      --text: #f0efe9; --text2: #a0a09a; --text3: #6b6a65;
-      --green: #5DCAA5; --green-light: #04342C;
-      --amber: #EF9F27; --amber-light: #412402;
-      --purple: #AFA9EC; --purple-light: #26215C;
-      --teal: #5DCAA5; --teal-light: #04342C;
-      --coral: #F0997B; --coral-light: #4A1B0C;
-      --blue: #85B7EB; --blue-light: #042C53;
-    }
+    --bg:          #FFF8F9;
+    --surface:     #FFFFFF;
+    --surface2:    #FFF0F2;
+    --border:      rgba(255,136,152,0.15);
+    --border2:     rgba(255,136,152,0.3);
+
+    --text:        #1A1A1A;
+    --text2:       #6B6A6D;
+    --text3:       #B0AFBA;
+
+    --green:       #3DB89A;
+    --green-light: #D4F4ED;
+    --red:         #E05370;
+
+    --radius:    16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg); color: var(--text);
-    min-height: 100vh; padding: 1.5rem 1rem 3rem;
-    font-size: 14px; line-height: 1.5;
+    font-family: 'Nunito', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 4rem;
+    font-size: 14px;
+    line-height: 1.5;
   }
 
-  .page { max-width: 720px; margin: 0 auto; }
-  .page-header { margin-bottom: 1.5rem; }
-  .page-title { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .page-sub { font-size: 13px; color: var(--text2); }
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1.5px solid var(--pink-light);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
 
-  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 10px; }
-  .sec-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
-  .ico { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-  .sec-title { font-size: 14px; font-weight: 600; }
-  .help-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--blue-light); color: var(--blue); margin-left: 6px; vertical-align: middle; font-weight: 500; }
-  .sec-badge { margin-left: auto; font-size: 12px; color: var(--text2); font-weight: 500; }
+  .logo {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--pink);
+    letter-spacing: -0.5px;
+    text-transform: lowercase;
+  }
 
-  .brand-count-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-  .brand-count-row label { font-size: 12px; color: var(--text2); width: 160px; flex-shrink: 0; }
-  .brand-count-row input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: var(--surface2); outline: none; cursor: pointer; }
-  .brand-count-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--text); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,.2); }
-  .brand-count-row .val { font-size: 20px; font-weight: 600; min-width: 28px; text-align: right; }
+  .header-divider {
+    width: 1.5px;
+    height: 32px;
+    background: var(--pink-light);
+    margin: 0 4px;
+  }
 
-  .col-labels { display: grid; grid-template-columns: 28px 1fr 1fr 1fr 28px; gap: 8px; margin-bottom: 6px; padding: 0 2px; }
-  .col-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
-  .brand-rows { display: flex; flex-direction: column; gap: 7px; }
-  .brand-row { display: grid; grid-template-columns: 28px 1fr 1fr 1fr 28px; gap: 8px; align-items: center; }
-  .brand-num { width: 24px; height: 24px; border-radius: 50%; background: var(--surface2); font-size: 11px; color: var(--text2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 500; }
-  .brands-total-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 0; border-top: 0.5px solid var(--border); margin-top: 10px; }
-  .brands-total-row .lbl { font-size: 12px; color: var(--text2); }
-  .brands-total-row .tot { font-size: 16px; font-weight: 600; color: var(--green); }
+  .header-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
 
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* ── PAGE ── */
+  .page {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 12px;
+    transition: box-shadow .2s;
+  }
+  .card:hover { box-shadow: 0 4px 20px rgba(255,136,152,.08); }
+
+  .sec-hdr {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .ico {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+
+  .sec-title { font-size: 14px; font-weight: 700; color: var(--text); }
+
+  .help-tag {
+    font-size: 10px; padding: 2px 9px; border-radius: 20px;
+    background: var(--lavender); color: var(--lavender-deep);
+    margin-left: 6px; vertical-align: middle; font-weight: 700;
+  }
+
+  .sec-badge { margin-left: auto; font-size: 13px; color: var(--pink); font-weight: 700; }
+
+  /* ── RANGE ── */
+  .brand-count-row {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+  }
+  .brand-count-row label {
+    font-size: 12px; color: var(--text2); font-weight: 600;
+    width: 160px; flex-shrink: 0;
+  }
+  .brand-count-row input[type=range] {
+    flex: 1; -webkit-appearance: none; height: 5px;
+    border-radius: 3px; background: var(--pink-light); outline: none; cursor: pointer;
+  }
+  .brand-count-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--pink); cursor: pointer;
+    border: 3px solid white; box-shadow: 0 2px 8px rgba(255,136,152,.4);
+  }
+  .brand-count-row .val {
+    font-size: 22px; font-weight: 800; min-width: 28px;
+    text-align: right; color: var(--pink);
+  }
+
+  /* ── BRAND ROWS ── */
+  .col-labels {
+    display: grid; grid-template-columns: 28px 1fr 1fr 1fr 28px;
+    gap: 8px; margin-bottom: 6px; padding: 0 2px;
+  }
+  .col-label {
+    font-size: 10px; color: var(--text3); text-transform: uppercase;
+    letter-spacing: .06em; font-weight: 700;
+  }
+  .brand-rows { display: flex; flex-direction: column; gap: 8px; }
+  .brand-row {
+    display: grid; grid-template-columns: 28px 1fr 1fr 1fr 28px;
+    gap: 8px; align-items: center;
+  }
+  .brand-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--pink-light); font-size: 11px; color: var(--pink);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-weight: 800;
+  }
+  .brands-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0 0; border-top: 1.5px solid var(--border); margin-top: 10px;
+  }
+  .brands-total-row .lbl { font-size: 12px; color: var(--text2); font-weight: 600; }
+  .brands-total-row .tot { font-size: 17px; font-weight: 800; color: var(--green); }
+
+  /* ── INPUTS ── */
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 12px; color: var(--text2); }
+  .field     { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--text2); font-weight: 600; }
 
   input[type=text], input[type=number] {
-    font-size: 13px; padding: 6px 10px; height: 34px;
-    border-radius: var(--radius-sm); border: 0.5px solid var(--border2);
-    background: var(--surface2); color: var(--text); width: 100%;
-    font-family: inherit; transition: border-color .15s;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 600;
+    padding: 7px 11px; height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text); width: 100%;
+    transition: border-color .15s, box-shadow .15s;
   }
-  input[type=text]:focus, input[type=number]:focus { outline: none; border-color: #378ADD; box-shadow: 0 0 0 2px rgba(55,138,221,.15); }
+  input[type=text]:focus, input[type=number]:focus {
+    outline: none; border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(255,136,152,.15);
+  }
 
-  .del-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 14px; padding: 0; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; transition: all .15s; }
-  .del-btn:hover { color: #E24B4A; background: rgba(226,75,74,.1); }
+  .del-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 14px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px; transition: all .15s;
+  }
+  .del-btn:hover { color: var(--red); background: #FFF0F2; }
 
-  .note-box { font-size: 11px; color: var(--text2); background: var(--surface2); border-radius: var(--radius-sm); padding: 8px 10px; margin-top: 10px; display: flex; gap: 6px; align-items: flex-start; border-left: 2px solid var(--border2); }
+  .note-box {
+    font-size: 11px; color: var(--text2); font-weight: 600;
+    background: var(--lavender); border-radius: var(--radius-sm);
+    padding: 8px 12px; margin-top: 10px;
+    display: flex; gap: 6px; align-items: flex-start;
+    opacity: .85;
+  }
 
-  .summary-card { background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 10px; }
-  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
-  .mc { background: var(--surface); border-radius: var(--radius-sm); padding: .9rem 1rem; border: 0.5px solid var(--border); }
-  .mc-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; font-weight: 500; }
-  .mc-val { font-size: 20px; font-weight: 600; }
-  .mc-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+  /* ── SUMMARY ── */
+  .summary-card {
+    background: linear-gradient(135deg, #FFF0F4 0%, #F4F0FF 100%);
+    border: 1.5px solid var(--border2);
+    border-radius: var(--radius); padding: 1.5rem;
+    margin-bottom: 12px;
+  }
 
-  .margin-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
-  .margin-label-row .lbl { font-size: 12px; color: var(--text2); }
-  .margin-label-row .pct { font-size: 22px; font-weight: 700; }
-  .bar-bg { background: var(--border); border-radius: 20px; height: 8px; width: 100%; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 20px; transition: width .5s cubic-bezier(.4,0,.2,1), background .4s; }
-  .bar-ticks { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-top: 4px; }
-  .verdict { display: flex; align-items: center; gap: 8px; padding: .7rem 1rem; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; margin-top: 12px; }
+  .metrics-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr));
+    gap: 10px; margin-bottom: 16px;
+  }
+  .mc {
+    background: white; border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem; border: 1.5px solid var(--border);
+  }
+  .mc-label {
+    font-size: 10px; color: var(--text3); text-transform: uppercase;
+    letter-spacing: .06em; margin-bottom: 5px; font-weight: 700;
+  }
+  .mc-val  { font-size: 20px; font-weight: 800; }
+  .mc-sub  { font-size: 10px; color: var(--text3); margin-top: 3px; font-weight: 600; }
 
-  .chart-split { display: grid; grid-template-columns: 1fr minmax(0,160px); gap: 16px; align-items: center; overflow: hidden; }
-  .chart-col { display: flex; flex-direction: column; align-items: center; min-width: 0; overflow: hidden; }
+  .margin-label-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .margin-label-row .lbl { font-size: 13px; color: var(--text2); font-weight: 700; }
+  .margin-label-row .pct { font-size: 24px; font-weight: 800; }
+
+  .bar-bg {
+    background: rgba(255,255,255,.6); border-radius: 20px;
+    height: 10px; width: 100%; overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 20px;
+    transition: width .5s cubic-bezier(.4,0,.2,1), background .4s;
+  }
+  .bar-ticks {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--text3); margin-top: 5px; font-weight: 600;
+  }
+  .verdict {
+    display: flex; align-items: center; gap: 10px;
+    padding: .8rem 1.1rem; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 700; margin-top: 14px;
+  }
+
+  /* ── UNIT TABLE ── */
+  .chart-split {
+    display: grid; grid-template-columns: 1fr minmax(0,165px);
+    gap: 16px; align-items: center; overflow: hidden;
+  }
+  .chart-col {
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 0; overflow: hidden;
+  }
   .unit-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .unit-table td { padding: 7px 0; border-bottom: 0.5px solid var(--border); }
-  .unit-table td:last-child { text-align: right; font-weight: 600; }
+  .unit-table td {
+    padding: 7px 0; border-bottom: 1.5px solid var(--border);
+  }
+  .unit-table td:first-child { color: var(--text2); font-weight: 600; }
+  .unit-table td:last-child  { text-align: right; font-weight: 800; }
   .unit-table tr:last-child td { border-bottom: none; }
 
-  /* Export / history */
-  .export-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: var(--radius-sm); border: 0.5px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; font-family: inherit; transition: all .15s; }
-  .btn:hover { background: var(--surface2); }
-  .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .btn-primary:hover { opacity: .85; }
+  /* ── EXPORT ── */
+  .export-bar {
+    display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 700; padding: 8px 16px;
+    border-radius: 50px; border: 1.5px solid var(--border2);
+    background: var(--surface); color: var(--text);
+    cursor: pointer; transition: all .15s;
+  }
+  .btn:hover { background: var(--pink-light); border-color: var(--pink); }
+  .btn-primary {
+    background: var(--pink); color: white; border-color: var(--pink);
+  }
+  .btn-primary:hover { background: #F07080; border-color: #F07080; }
   .btn-ghost { color: var(--text3); border-color: transparent; }
-  .btn-ghost:hover { color: var(--red); background: rgba(226,75,74,.08); }
+  .btn-ghost:hover { color: var(--red); background: #FFF0F2; border-color: transparent; }
+
+  .project-field {
+    display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px;
+  }
+  .project-field label { font-size: 12px; color: var(--text2); font-weight: 700; }
+  .project-field input { max-width: 420px; }
 
   .history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .history-table th { text-align: left; padding: 6px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); border-bottom: 0.5px solid var(--border); font-weight: 500; }
-  .history-table td { padding: 7px 8px; border-bottom: 0.5px solid var(--border); color: var(--text2); vertical-align: middle; }
-  .history-table td:first-child { color: var(--text); font-weight: 500; }
+  .history-table th {
+    text-align: left; padding: 7px 10px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--text3); border-bottom: 1.5px solid var(--border); font-weight: 700;
+  }
+  .history-table td {
+    padding: 8px 10px; border-bottom: 1.5px solid var(--border);
+    color: var(--text2); font-weight: 600; vertical-align: middle;
+  }
+  .history-table td:first-child { color: var(--text); font-weight: 700; }
   .history-table tr:last-child td { border-bottom: none; }
-  .del-snap { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 13px; padding: 3px 5px; border-radius: 4px; }
-  .del-snap:hover { color: #E24B4A; background: rgba(226,75,74,.1); }
-  .empty-history { text-align: center; padding: 1.5rem; color: var(--text3); font-size: 12px; }
+  .del-snap {
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 13px; padding: 3px 5px; border-radius: 6px;
+  }
+  .del-snap:hover { color: var(--red); background: #FFF0F2; }
+  .empty-history {
+    text-align: center; padding: 2rem; color: var(--text3);
+    font-size: 13px; font-weight: 600;
+  }
 
-  @media (max-width: 520px) {
+  /* ── FOOTER ── */
+  .page-footer {
+    text-align: center; font-size: 11px; color: var(--text3);
+    margin-top: 1.5rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+
+  @media (max-width: 540px) {
+    .header { padding: .8rem 1rem; }
     .chart-split { grid-template-columns: 1fr; }
     .two-col { grid-template-columns: 1fr; }
     .three-col { grid-template-columns: 1fr 1fr; }
@@ -141,20 +351,25 @@
 </style>
 </head>
 <body>
-<div class="page">
 
-  <div class="page-header">
-    <div class="page-title">Калькулятор маржинальности</div>
-    <div class="page-sub">Мультибрендовый спецпроект — юнит-экономика и маржа</div>
-  </div>
+<!-- HEADER -->
+<div class="header">
+  <div class="logo"><span>ma</span><span>am</span></div>
+  <div class="header-divider"></div>
+  <div class="header-title">Калькулятор маржинальности спецпроектов</div>
+</div>
+
+<div class="page">
 
   <!-- REVENUE -->
   <div class="card">
     <div class="sec-hdr">
-      <div class="ico" style="background:var(--blue-light)"><i class="ti ti-building" style="color:var(--blue)"></i></div>
+      <div class="ico" style="background:var(--pink-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8898" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
       <div>
         <div class="sec-title">Доходы — участники проекта</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:1px">Для каждого бренда своя ставка</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px;font-weight:600">Для каждого бренда своя ставка</div>
       </div>
     </div>
     <div class="brand-count-row">
@@ -179,7 +394,9 @@
   <!-- MEDIA -->
   <div class="card">
     <div class="sec-hdr">
-      <div class="ico" style="background:var(--teal-light)"><i class="ti ti-speakerphone" style="color:var(--teal)"></i></div>
+      <div class="ico" style="background:var(--teal-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7BC8CA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
       <div class="sec-title">Медийное анонсирование <span class="help-tag">внутренние косты</span></div>
       <div class="sec-badge" id="mediaBadge">0 ₽</div>
     </div>
@@ -192,7 +409,9 @@
   <!-- PRODUCTION -->
   <div class="card">
     <div class="sec-hdr">
-      <div class="ico" style="background:var(--amber-light)"><i class="ti ti-camera" style="color:var(--amber)"></i></div>
+      <div class="ico" style="background:var(--yellow-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC158" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </div>
       <div class="sec-title">Продакшен <span class="help-tag">внутренние косты</span></div>
       <div class="sec-badge" id="prodBadge">0 ₽</div>
     </div>
@@ -205,7 +424,9 @@
   <!-- EDITORIAL -->
   <div class="card">
     <div class="sec-hdr">
-      <div class="ico" style="background:var(--purple-light)"><i class="ti ti-pencil" style="color:var(--purple)"></i></div>
+      <div class="ico" style="background:var(--lavender)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93A2FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
       <div class="sec-title">Редакционный контент <span class="help-tag">внутренние косты</span></div>
       <div class="sec-badge" id="editBadge">0 ₽</div>
     </div>
@@ -215,7 +436,7 @@
       <div class="field"><label>Прочее, ₽</label><input type="number" id="e3" value="0" step="5000" oninput="calc()"></div>
     </div>
     <div class="note-box">
-      <i class="ti ti-info-circle" style="font-size:13px;flex-shrink:0;margin-top:1px"></i>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#93A2FF" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Внутренняя стоимость создания контента. Если бренд оплачивает спецматериалы о себе — добавьте эту сумму в «доп. опции» его строки выше.
     </div>
   </div>
@@ -223,7 +444,9 @@
   <!-- BONUSES -->
   <div class="card">
     <div class="sec-hdr">
-      <div class="ico" style="background:var(--coral-light)"><i class="ti ti-cash" style="color:var(--coral)"></i></div>
+      <div class="ico" style="background:var(--pink-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8898" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+      </div>
       <div class="sec-title">Премии сотрудников <span class="help-tag">внутренние косты</span></div>
       <div class="sec-badge" id="bonusBadge">0 ₽</div>
     </div>
@@ -237,7 +460,9 @@
   <!-- SUMMARY -->
   <div class="summary-card">
     <div class="sec-hdr" style="margin-bottom:.85rem">
-      <div class="ico" style="background:var(--blue-light)"><i class="ti ti-chart-pie" style="color:var(--blue)"></i></div>
+      <div class="ico" style="background:rgba(255,255,255,.8)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8898" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
       <div class="sec-title">Итоговые показатели</div>
     </div>
     <div class="metrics-grid">
@@ -269,25 +494,27 @@
   <!-- PROJECT TOTAL -->
   <div class="card">
     <div class="sec-hdr">
-      <div class="ico" style="background:#EAF3DE"><i class="ti ti-report-money" style="color:#3B6D11"></i></div>
+      <div class="ico" style="background:var(--green-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3DB89A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+      </div>
       <div class="sec-title">Экономика проекта — итого</div>
     </div>
     <div class="chart-split">
       <table class="unit-table">
-        <tr><td style="color:var(--text2)">Выручка по проекту</td><td id="uRev">—</td></tr>
-        <tr><td style="color:var(--text2)">Затраты по проекту</td><td id="uCost">—</td></tr>
-        <tr><td style="color:var(--text2);padding-left:12px;font-size:12px">↳ медийное анонсирование</td><td id="uMedia" style="font-size:12px;color:var(--text2)">—</td></tr>
-        <tr><td style="color:var(--text2);padding-left:12px;font-size:12px">↳ продакшен</td><td id="uProd" style="font-size:12px;color:var(--text2)">—</td></tr>
-        <tr><td style="color:var(--text2);padding-left:12px;font-size:12px">↳ редакционный контент</td><td id="uEdit" style="font-size:12px;color:var(--text2)">—</td></tr>
-        <tr><td style="color:var(--text2);padding-left:12px;font-size:12px">↳ премии сотрудников</td><td id="uBonus" style="font-size:12px;color:var(--text2)">—</td></tr>
-        <tr><td style="color:var(--text2)"><strong>Прибыль проекта</strong></td><td id="uGross">—</td></tr>
-        <tr><td style="color:var(--text2)">Маржинальность</td><td id="uMargin">—</td></tr>
+        <tr><td>Выручка по проекту</td><td id="uRev">—</td></tr>
+        <tr><td>Затраты по проекту</td><td id="uCost">—</td></tr>
+        <tr><td style="padding-left:14px;font-size:12px;color:var(--text3)">↳ медийное анонсирование</td><td id="uMedia" style="font-size:12px">—</td></tr>
+        <tr><td style="padding-left:14px;font-size:12px;color:var(--text3)">↳ продакшен</td><td id="uProd" style="font-size:12px">—</td></tr>
+        <tr><td style="padding-left:14px;font-size:12px;color:var(--text3)">↳ редакционный контент</td><td id="uEdit" style="font-size:12px">—</td></tr>
+        <tr><td style="padding-left:14px;font-size:12px;color:var(--text3)">↳ премии сотрудников</td><td id="uBonus" style="font-size:12px">—</td></tr>
+        <tr><td><strong>Прибыль проекта</strong></td><td id="uGross">—</td></tr>
+        <tr><td>Маржинальность</td><td id="uMargin">—</td></tr>
       </table>
       <div class="chart-col">
-        <div style="position:relative;width:140px;height:140px;flex-shrink:0">
-          <canvas id="donut" role="img" aria-label="Структура затрат" width="140" height="140"></canvas>
+        <div style="position:relative;width:145px;height:145px;flex-shrink:0">
+          <canvas id="donut" width="145" height="145"></canvas>
         </div>
-        <div id="legend" style="margin-top:8px;font-size:11px;color:var(--text2);width:100%"></div>
+        <div id="legend" style="margin-top:8px;font-size:11px;color:var(--text2);width:100%;font-weight:600"></div>
       </div>
     </div>
   </div>
@@ -295,82 +522,79 @@
   <!-- HISTORY / EXPORT -->
   <div class="card">
     <div class="sec-hdr">
-      <div class="ico" style="background:var(--green-light)"><i class="ti ti-history" style="color:var(--green)"></i></div>
+      <div class="ico" style="background:var(--pink-light)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8898" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      </div>
       <div class="sec-title">Сохранение и экспорт</div>
     </div>
-    <div class="field" style="margin-bottom:10px">
+    <div class="project-field">
       <label>Название проекта</label>
-      <input type="text" id="projectName" placeholder="Например: Весенний спецпроект 2025" style="max-width:400px">
+      <input type="text" id="projectName" placeholder="Например: Весенний спецпроект 2025">
     </div>
     <div class="export-bar">
       <button class="btn btn-primary" id="saveBtn" onclick="saveSnapshot()">
-        <i class="ti ti-bookmark"></i> Сохранить снапшот
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Сохранить снапшот
       </button>
       <button class="btn" onclick="exportCSV()">
-        <i class="ti ti-file-spreadsheet"></i> Скачать CSV
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Скачать CSV
       </button>
       <button class="btn btn-ghost" onclick="clearHistory()" style="margin-left:auto">
-        <i class="ti ti-trash"></i> Очистить историю
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Очистить историю
       </button>
     </div>
     <div id="historyBlock"></div>
   </div>
 
-  <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:1rem">
-    Все суммы в рублях · История хранится в браузере
+  <div class="page-footer">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF8898" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Все суммы в рублях · История хранится в браузере · maam спецпроекты
   </div>
 
 </div>
 
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────
 let donut = null;
 let brandCount = 3;
-const brandData = {}; // persists values across count changes
+const brandData = {};
 const LETTERS = 'ABCDEFGHIJKLMNO';
 
 function defaultBrand(i) { return { name: 'Бренд ' + LETTERS[i], entry: 0, extra: 0 }; }
 
-// ─── FORMAT ───────────────────────────────────────────────────────────────
 function fmtS(n) {
   if (Math.abs(n) >= 1000000) return (n/1000000).toFixed(1) + ' млн ₽';
   if (Math.abs(n) >= 1000)    return Math.round(n/1000) + 'K ₽';
   return Math.round(n) + ' ₽';
 }
-function fmt(n) { return Math.round(n).toLocaleString('ru-RU') + ' ₽'; }
-function v(id)  { return parseFloat(document.getElementById(id).value) || 0; }
+function fmt(n)  { return Math.round(n).toLocaleString('ru-RU') + ' ₽'; }
+function v(id)   { return parseFloat(document.getElementById(id).value) || 0; }
 function plural(n, a, b, c) { return n===1?a:n>1&&n<5?b:c; }
-function marginColor(m) { return m>=25?'var(--green)':m>=10?'#BA7517':'var(--red)'; }
-function marginBar(m)   { return m>=25?'#1D9E75':m>=10?'#EF9F27':'#E24B4A'; }
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function mColor(m) { return m>=25?'var(--green)':m>=10?'#E8A020':'var(--red)'; }
+function mBar(m)   { return m>=25?'#3DB89A':m>=10?'#FFC158':'#FF8898'; }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ─── BRANDS ───────────────────────────────────────────────────────────────
 function saveBrandInputs() {
   for (let i = 0; i < 15; i++) {
-    const ne = document.getElementById('b_name_'  + i);
+    const ne = document.getElementById('b_name_' + i);
     const ee = document.getElementById('b_entry_' + i);
     const xe = document.getElementById('b_extra_' + i);
-    if (ne) {
-      brandData[i] = {
-        name:  ne.value,
-        entry: parseFloat(ee.value) || 0,
-        extra: parseFloat(xe.value) || 0,
-      };
-    }
+    if (ne) brandData[i] = { name: ne.value, entry: parseFloat(ee.value)||0, extra: parseFloat(xe.value)||0 };
   }
 }
 
 function setBrands(n) {
-  saveBrandInputs();           // 1. persist current inputs
+  saveBrandInputs();
   brandCount = parseInt(n);
   document.getElementById('brandCountVal').textContent = brandCount;
-  renderBrandRows();           // 2. re-render (restores saved values)
+  renderBrandRows();
   calc();
 }
 
 function renderBrandRows() {
-  const container = document.getElementById('brandRows');
-  container.innerHTML = '';
+  const c = document.getElementById('brandRows');
+  c.innerHTML = '';
   for (let i = 0; i < brandCount; i++) {
     const d = brandData[i] || defaultBrand(i);
     const row = document.createElement('div');
@@ -380,15 +604,17 @@ function renderBrandRows() {
       <input type="text"   id="b_name_${i}"  value="${escHtml(d.name)}" placeholder="Название" oninput="calc()">
       <input type="number" id="b_entry_${i}" value="${d.entry}" step="10000" placeholder="0" oninput="calc()">
       <input type="number" id="b_extra_${i}" value="${d.extra}" step="5000"  placeholder="0" oninput="calc()">
-      <button class="del-btn" onclick="clearBrand(${i})" title="Очистить строку"><i class="ti ti-x"></i></button>`;
-    container.appendChild(row);
+      <button class="del-btn" onclick="clearBrand(${i})" title="Очистить">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    c.appendChild(row);
   }
 }
 
 function clearBrand(i) {
   const d = defaultBrand(i);
   brandData[i] = { name: d.name, entry: 0, extra: 0 };
-  const ne = document.getElementById('b_name_'  + i);
+  const ne = document.getElementById('b_name_' + i);
   const ee = document.getElementById('b_entry_' + i);
   const xe = document.getElementById('b_extra_' + i);
   if (ne) ne.value = d.name;
@@ -399,21 +625,20 @@ function clearBrand(i) {
 
 function bv(i, f) {
   const el = document.getElementById('b_' + f + '_' + i);
-  return el ? parseFloat(el.value) || 0 : 0;
+  return el ? parseFloat(el.value)||0 : 0;
 }
 
-// ─── CALC ─────────────────────────────────────────────────────────────────
 function calc() {
   let totalRev = 0;
   for (let i = 0; i < brandCount; i++) totalRev += bv(i,'entry') + bv(i,'extra');
 
   const media  = v('mediaInt') + v('mediaDSP');
-  const prod   = v('p1')  + v('p2');
-  const edit   = v('e1')  + v('e2') + v('e3');
+  const prod   = v('p1') + v('p2');
+  const edit   = v('e1') + v('e2') + v('e3');
   const bonus  = v('bonusSales') + v('bonusAcc') + v('bonusOther');
   const direct = media + prod + edit + bonus;
   const profit = totalRev - direct;
-  const margin = totalRev > 0 ? (profit / totalRev) * 100 : 0;
+  const margin = totalRev > 0 ? (profit/totalRev)*100 : 0;
 
   document.getElementById('mediaBadge').textContent   = fmtS(media);
   document.getElementById('prodBadge').textContent    = fmtS(prod);
@@ -425,24 +650,24 @@ function calc() {
   document.getElementById('mRevSub').textContent  = brandCount + ' ' + plural(brandCount,'бренд','бренда','брендов');
   document.getElementById('mDirect').textContent  = fmtS(direct);
   document.getElementById('mProfit').textContent  = fmtS(profit);
-  document.getElementById('mProfit').style.color  = profit >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('mProfitSub').textContent = profit >= 0 ? 'чистая прибыль' : 'убыток';
+  document.getElementById('mProfit').style.color  = profit>=0?'var(--green)':'var(--red)';
+  document.getElementById('mProfitSub').textContent = profit>=0?'чистая прибыль':'убыток';
   document.getElementById('mPct').textContent     = margin.toFixed(1) + '%';
-  document.getElementById('mPct').style.color     = marginColor(margin);
+  document.getElementById('mPct').style.color     = mColor(margin);
 
   const bw = Math.max(0, Math.min(100, margin/80*100));
   document.getElementById('barFill').style.width      = bw + '%';
-  document.getElementById('barFill').style.background = marginBar(margin);
+  document.getElementById('barFill').style.background = mBar(margin);
 
-  let vt, vbg, vc, icon;
-  if      (margin>=35) { vt='Отличная маржинальность — проект выгоден';         vbg='#E1F5EE'; vc='#085041'; icon='ti-circle-check'; }
-  else if (margin>=20) { vt='Хорошая маржинальность — проект рентабелен';       vbg='#EAF3DE'; vc='#27500A'; icon='ti-circle-check'; }
-  else if (margin>=10) { vt='Слабая маржинальность — пересмотрите затраты';     vbg='#FAEEDA'; vc='#633806'; icon='ti-alert-triangle'; }
-  else if (margin>=0)  { vt='Маржинальность под угрозой — почти в нуле';        vbg='#FCEBEB'; vc='#791F1F'; icon='ti-alert-triangle'; }
-  else                 { vt='Проект убыточен — необходим пересмотр';             vbg='#FCEBEB'; vc='#501313'; icon='ti-x'; }
+  let vt, vbg, vc, vstroke;
+  if      (margin>=35) { vt='Отличная маржинальность — проект выгоден';         vbg='#D4F4ED'; vc='#1A7A60'; vstroke='#3DB89A'; }
+  else if (margin>=20) { vt='Хорошая маржинальность — проект рентабелен';       vbg='#E8F5D4'; vc='#3A6020'; vstroke='#7BC87A'; }
+  else if (margin>=10) { vt='Слабая маржинальность — пересмотрите затраты';     vbg='#FFF3D4'; vc='#7A5010'; vstroke='#FFC158'; }
+  else if (margin>=0)  { vt='Маржинальность под угрозой — почти в нуле';        vbg='#FFE8E8'; vc='#8A2020'; vstroke='#FF8898'; }
+  else                 { vt='Проект убыточен — необходим пересмотр';             vbg='#FFE0E4'; vc='#6A1020'; vstroke='#E05370'; }
   const vb = document.getElementById('verdict');
   vb.style.background = vbg; vb.style.color = vc;
-  vb.innerHTML = `<i class="ti ${icon}" style="font-size:16px;flex-shrink:0"></i>${vt}`;
+  vb.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${vstroke}" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${vt}`;
 
   document.getElementById('uRev').textContent    = fmt(totalRev);
   document.getElementById('uCost').textContent   = fmt(direct);
@@ -451,25 +676,24 @@ function calc() {
   document.getElementById('uEdit').textContent   = fmtS(edit);
   document.getElementById('uBonus').textContent  = fmtS(bonus);
   document.getElementById('uGross').textContent  = fmt(profit);
-  document.getElementById('uGross').style.color  = profit>=0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('uGross').style.color  = profit>=0?'var(--green)':'var(--red)';
   document.getElementById('uMargin').textContent = margin.toFixed(1) + '%';
-  document.getElementById('uMargin').style.color = marginColor(margin);
+  document.getElementById('uMargin').style.color = mColor(margin);
 
   updateDonut(media, prod, edit, bonus);
 }
 
-// ─── DONUT ────────────────────────────────────────────────────────────────
 function updateDonut(media, prod, edit, bonus) {
   const data   = [media, prod, edit, bonus];
   const labels = ['Медийка','Продакшен','Контент','Премии'];
-  const colors = ['#1D9E75','#EF9F27','#7F77DD','#D85A30'];
+  const colors = ['#7BC8CA','#FFC158','#93A2FF','#FF8898'];
   const total  = data.reduce((a,b)=>a+b,0);
   if (donut) { donut.data.datasets[0].data = data; donut.update(); return; }
   donut = new Chart(document.getElementById('donut'), {
     type: 'doughnut',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }] },
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 5 }] },
     options: {
-      responsive: false, maintainAspectRatio: false, cutout: '66%',
+      responsive: false, maintainAspectRatio: false, cutout: '68%',
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: c => ' '+fmtS(c.raw)+(total>0?' ('+Math.round(c.raw/total*100)+'%)':'') } }
@@ -477,13 +701,14 @@ function updateDonut(media, prod, edit, bonus) {
     }
   });
   document.getElementById('legend').innerHTML = labels.map((l,i) =>
-    `<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px"><span style="width:9px;height:9px;border-radius:2px;background:${colors[i]};display:inline-block;flex-shrink:0"></span>${l}</div>`
-  ).join('');
+    `<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+      <span style="width:9px;height:9px;border-radius:3px;background:${colors[i]};display:inline-block;flex-shrink:0"></span>${l}
+    </div>`).join('');
 }
 
-// ─── SNAPSHOTS ────────────────────────────────────────────────────────────
+// ── SNAPSHOTS ──
 let snapshots = [];
-try { snapshots = JSON.parse(localStorage.getItem('margin_snapshots') || '[]'); } catch(e) {}
+try { snapshots = JSON.parse(localStorage.getItem('maam_margin_snaps') || '[]'); } catch(e){}
 
 function collectState() {
   saveBrandInputs();
@@ -496,17 +721,14 @@ function collectState() {
     if (d.entry || d.extra) brands.push({ name: d.name, entry: d.entry, extra: d.extra, total: sum });
   }
   const media  = v('mediaInt') + v('mediaDSP');
-  const prod   = v('p1')  + v('p2');
-  const edit   = v('e1')  + v('e2') + v('e3');
+  const prod   = v('p1') + v('p2');
+  const edit   = v('e1') + v('e2') + v('e3');
   const bonus  = v('bonusSales') + v('bonusAcc') + v('bonusOther');
   const direct = media + prod + edit + bonus;
   const profit = totalRev - direct;
   const margin = totalRev > 0 ? (profit/totalRev)*100 : 0;
   const projectName = document.getElementById('projectName').value.trim() || '—';
-  return { totalRev, media, prod, edit, bonus, direct, profit, margin, brands, projectName,
-           mediaInt:v('mediaInt'), mediaDSP:v('mediaDSP'),
-           p1:v('p1'), p2:v('p2'), e1:v('e1'), e2:v('e2'), e3:v('e3'),
-           bonusSales:v('bonusSales'), bonusAcc:v('bonusAcc'), bonusOther:v('bonusOther') };
+  return { totalRev, media, prod, edit, bonus, direct, profit, margin, brands, projectName };
 }
 
 function saveSnapshot() {
@@ -514,19 +736,17 @@ function saveSnapshot() {
   const now = new Date();
   const label = now.toLocaleDateString('ru-RU') + ' ' + now.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   snapshots.unshift({ label, ts: now.getTime(), ...s });
-  try { localStorage.setItem('margin_snapshots', JSON.stringify(snapshots)); } catch(e){}
+  try { localStorage.setItem('maam_margin_snaps', JSON.stringify(snapshots)); } catch(e){}
   renderHistory();
-  // feedback
   const btn = document.getElementById('saveBtn');
   const orig = btn.innerHTML;
-  btn.innerHTML = '<i class="ti ti-check"></i> Сохранено!';
-  btn.style.background = '#1D9E75'; btn.style.borderColor = '#1D9E75';
-  setTimeout(() => { btn.innerHTML = orig; btn.style.background=''; btn.style.borderColor=''; }, 1600);
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Сохранено!';
+  setTimeout(() => { btn.innerHTML = orig; }, 1600);
 }
 
 function deleteSnapshot(ts) {
   snapshots = snapshots.filter(s => s.ts !== ts);
-  try { localStorage.setItem('margin_snapshots', JSON.stringify(snapshots)); } catch(e){}
+  try { localStorage.setItem('maam_margin_snaps', JSON.stringify(snapshots)); } catch(e){}
   renderHistory();
 }
 
@@ -534,7 +754,7 @@ function clearHistory() {
   if (!snapshots.length) return;
   if (confirm('Удалить всю историю снапшотов?')) {
     snapshots = [];
-    try { localStorage.removeItem('margin_snapshots'); } catch(e){}
+    try { localStorage.removeItem('maam_margin_snaps'); } catch(e){}
     renderHistory();
   }
 }
@@ -542,7 +762,10 @@ function clearHistory() {
 function renderHistory() {
   const el = document.getElementById('historyBlock');
   if (!snapshots.length) {
-    el.innerHTML = '<div class="empty-history"><i class="ti ti-clock" style="font-size:20px;display:block;margin-bottom:6px"></i>Нет сохранённых снапшотов<br>Заполните данные и нажмите «Сохранить снапшот»</div>';
+    el.innerHTML = `<div class="empty-history">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFB0BB" stroke-width="2" stroke-linecap="round" style="display:block;margin:0 auto 8px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Нет сохранённых снапшотов<br>Заполните данные и нажмите «Сохранить снапшот»
+    </div>`;
     return;
   }
   el.innerHTML = `
@@ -551,32 +774,26 @@ function renderHistory() {
       <tbody>
         ${snapshots.map(s=>`
           <tr>
-            <td>${escHtml(s.projectName || '—')}</td>
-            <td style="color:var(--text2);font-weight:400">${s.label}</td>
+            <td>${escHtml(s.projectName||'—')}</td>
+            <td style="color:var(--text3)">${s.label}</td>
             <td>${fmtS(s.totalRev)}</td>
             <td>${fmtS(s.direct)}</td>
-            <td style="font-weight:600;color:${s.profit>=0?'var(--green)':'var(--red)'}">${fmtS(s.profit)}</td>
-            <td style="font-weight:600;color:${marginColor(s.margin)}">${s.margin.toFixed(1)}%</td>
-            <td><button class="del-snap" onclick="deleteSnapshot(${s.ts})" title="Удалить"><i class="ti ti-x"></i></button></td>
+            <td style="color:${s.profit>=0?'var(--green)':'var(--red)'}">${fmtS(s.profit)}</td>
+            <td style="color:${mColor(s.margin)}">${s.margin.toFixed(1)}%</td>
+            <td><button class="del-snap" onclick="deleteSnapshot(${s.ts})" title="Удалить">✕</button></td>
           </tr>`).join('')}
       </tbody>
     </table>`;
 }
 
-// ─── CSV EXPORT ───────────────────────────────────────────────────────────
 function exportCSV() {
-  if (!snapshots.length) {
-    alert('Нет снапшотов для экспорта.\nСохраните хотя бы один снапшот, нажав «Сохранить снапшот».');
-    return;
-  }
-  const rows = [
-    ['Проект','Дата','Брендов','Выручка (₽)','Медийка (₽)','Продакшен (₽)','Контент (₽)','Премии (₽)','Итого затраты (₽)','Прибыль (₽)','Маржа (%)']
-  ];
+  if (!snapshots.length) { alert('Нет снапшотов для экспорта. Сохраните хотя бы один снапшот.'); return; }
+  const rows = [['Проект','Дата','Брендов','Выручка (₽)','Медийка (₽)','Продакшен (₽)','Контент (₽)','Премии (₽)','Итого затраты (₽)','Прибыль (₽)','Маржа (%)']];
   snapshots.forEach(s => {
-    rows.push([ s.projectName||'—', s.label, s.brands?s.brands.length:'—', s.totalRev, s.media, s.prod, s.edit, s.bonus||0, s.direct, s.profit, s.margin.toFixed(1) ]);
+    rows.push([s.projectName||'—', s.label, s.brands?s.brands.length:'—', s.totalRev, s.media, s.prod, s.edit, s.bonus||0, s.direct, s.profit, s.margin.toFixed(1)]);
     if (s.brands && s.brands.length) {
-      rows.push(['','Бренд','Ставка входа','Доп. опции','Итого по бренду','','','','','']);
-      s.brands.forEach(b => rows.push(['', b.name, b.entry, b.extra, b.total, '', '', '', '', '']));
+      rows.push(['','Бренд','Ставка входа','Доп. опции','Итого','','','','','','']);
+      s.brands.forEach(b => rows.push(['', b.name, b.entry, b.extra, b.total, '', '', '', '', '', '']));
       rows.push([]);
     }
   });
@@ -584,13 +801,10 @@ function exportCSV() {
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url;
-  a.download = 'margin_' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = 'maam_margin_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(url);
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────
 renderBrandRows();
 calc();
 renderHistory();
