@@ -808,6 +808,26 @@ function exportCSV() {
 renderBrandRows();
 calc();
 renderHistory();
+
+// ── AUTO-RESIZE FOR NOTION EMBED ──
+// Sends page height to parent frame so Notion resizes the embed block automatically
+function notifyHeight() {
+  const h = document.documentElement.scrollHeight;
+  window.parent.postMessage({ type: 'resize', height: h }, '*');
+  // Also try Notion's legacy format
+  window.parent.postMessage(JSON.stringify({ type: 'resize', height: h }), '*');
+}
+
+// Fire on load and whenever content changes
+window.addEventListener('load', notifyHeight);
+
+// Watch for any DOM size changes (brand rows added, history saved, etc.)
+const ro = new ResizeObserver(() => notifyHeight());
+ro.observe(document.body);
+
+// Also fire after calc and render calls
+const _origCalc = calc;
+calc = function() { _origCalc(); setTimeout(notifyHeight, 50); };
 </script>
 </body>
 </html>
